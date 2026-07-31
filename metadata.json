@@ -1,0 +1,8 @@
+{
+  "name": "REMOTE JOBS PLATFORM",
+  "description": "Centralized remote job aggregator & career suite for national and international remote job seekers with AI tools, real-time tracking, offline access, and localized UI.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

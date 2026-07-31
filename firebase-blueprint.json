@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "userProfiles": {
+      "title": "User Profiles",
+      "description": "User account profiles, preferences, and subscription state",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "uiLanguage": { "type": "string" },
+        "subscription": { "type": "object" },
+        "savedPlatformIds": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "savedJobs": {
+      "title": "Saved Jobs",
+      "description": "Jobs saved or bookmarked by users",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "platformId": { "type": "string" },
+        "title": { "type": "string" },
+        "savedAt": { "type": "string" }
+      },
+      "required": ["userId", "platformId"]
+    },
+    "resumeDrafts": {
+      "title": "Resume Drafts",
+      "description": "User saved resume drafts and optimizations",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "formData": { "type": "object" },
+        "targetJobDesc": { "type": "string" },
+        "savedAt": { "type": "string" }
+      },
+      "required": ["userId"]
+    }
+  }
+}
