@@ -26,7 +26,7 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
     trialDaysRemaining: 7,
     priceAmount: 'Free 7-Day Trial',
   },
-  theme: 'light',
+  theme: 'dark',
   uiLanguage: 'en',
   notificationsEnabled: true,
   xpPoints: 350,

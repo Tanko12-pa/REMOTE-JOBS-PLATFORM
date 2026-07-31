@@ -40,6 +40,7 @@ import {
 } from './utils/storage';
 
 import { Header } from './components/Header';
+import { PWABanner } from './components/PWABanner';
 import { LeftNavigationPanel } from './components/LeftNavigationPanel';
 import { PlatformListView } from './components/PlatformListView';
 import { AIResumeOptimizerView } from './components/AIResumeOptimizerView';
@@ -60,7 +61,8 @@ import { OAuthModal } from './components/OAuthModal';
 export function App() {
   // Theme State
   const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('remote_jobs_dark_mode') === 'true';
+    const saved = localStorage.getItem('remote_jobs_dark_mode');
+    return saved !== 'false';
   });
 
   // Language State
@@ -72,7 +74,10 @@ export function App() {
 
   // Local Storage Data States
   const [savedPlatformIds, setSavedPlatformIds] = useState<string[]>(loadSavedPlatformIds);
-  const [userProfile, setUserProfile] = useState<UserProfile>(() => loadUserProfile());
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
+    const loaded = loadUserProfile();
+    return { ...loaded, theme: localStorage.getItem('remote_jobs_dark_mode') === 'false' ? 'light' : 'dark' };
+  });
   const [resumeVersions, setResumeVersions] = useState<ResumeVersion[]>(() =>
     loadResumeVersions()
   );
@@ -91,16 +96,27 @@ export function App() {
     targetKeywords: ['React', 'Developer', 'Virtual Assistant'],
   });
 
-  // Sync Dark Mode to DOM
+  // Sync Dark Mode to DOM and userProfile
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('remote_jobs_dark_mode', 'true');
+      setUserProfile((prev) => (prev.theme !== 'dark' ? { ...prev, theme: 'dark' } : prev));
     } else {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('remote_jobs_dark_mode', 'false');
+      setUserProfile((prev) => (prev.theme !== 'light' ? { ...prev, theme: 'light' } : prev));
     }
   }, [darkMode]);
+
+  // Keep darkMode state synchronized with userProfile.theme when user toggles theme elsewhere
+  useEffect(() => {
+    if (userProfile.theme === 'dark' && !darkMode) {
+      setDarkMode(true);
+    } else if (userProfile.theme === 'light' && darkMode) {
+      setDarkMode(false);
+    }
+  }, [userProfile.theme]);
 
   // Check Stripe Checkout session redirect parameters
   useEffect(() => {
@@ -297,6 +313,9 @@ export function App() {
         onOpenSubscriptionBilling={() => setActiveCategory('subscription_billing')}
         isOnline={navigator.onLine}
       />
+
+      {/* Progressive Web App (PWA) Offline & Install Status Banner */}
+      <PWABanner />
 
       {/* Main Responsive Layout: Left Navigation Panel + Main Workspace */}
       <div className="flex-1 flex max-w-7xl w-full mx-auto p-3 sm:p-4 gap-4">

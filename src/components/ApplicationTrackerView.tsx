@@ -98,6 +98,9 @@ export const ApplicationTrackerView: React.FC<ApplicationTrackerViewProps> = ({
     role: string;
   } | null>(null);
 
+  // CSV Backup Download Toast state
+  const [csvDownloadToast, setCsvDownloadToast] = useState<string | null>(null);
+
   const checkAndTriggerKeywordNotification = (
     roleText: string,
     companyText: string,
@@ -878,26 +881,59 @@ export const ApplicationTrackerView: React.FC<ApplicationTrackerViewProps> = ({
             {/* Export CSV Buttons */}
             <div className="flex flex-wrap items-center gap-1.5">
               <button
-                onClick={() => exportApplicationsCSV(applicationLogs)}
+                onClick={() => {
+                  exportApplicationsCSV(applicationLogs);
+                  setCsvDownloadToast(`Downloaded CSV backup of ${applicationLogs.length} job application log(s)!`);
+                  setTimeout(() => setCsvDownloadToast(null), 4000);
+                }}
                 id="export-applications-csv-btn"
-                className="px-2.5 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-[#064E3B] dark:text-[#FBBF24] hover:bg-[#FBBF24] hover:text-[#064E3B] text-xs font-bold flex items-center gap-1 border border-emerald-300 dark:border-emerald-800 transition-all"
-                title="Export Application Logs CSV"
+                className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-emerald-950 text-xs font-black flex items-center gap-1.5 shadow-xs transition-all hover:scale-105 cursor-pointer"
+                title="Download CSV of current job application logs to maintain a personal backup"
               >
-                <Download className="w-3.5 h-3.5" />
-                Download CSV
+                <Download className="w-3.5 h-3.5 text-emerald-950" />
+                Download Logs CSV
               </button>
 
               <button
-                onClick={() => exportSavedJobsCSV(savedPlatformIds)}
+                onClick={() => {
+                  exportSavedJobsCSV(savedPlatformIds);
+                  setCsvDownloadToast(`Downloaded CSV backup of ${savedPlatformIds.length} saved platform bookmark(s)!`);
+                  setTimeout(() => setCsvDownloadToast(null), 4000);
+                }}
                 id="export-saved-jobs-csv-btn"
-                className="px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-[#064E3B] dark:text-[#FBBF24] hover:bg-[#FBBF24] hover:text-[#064E3B] text-xs font-bold flex items-center gap-1 border border-[#FBBF24]/40 transition-all"
+                className="px-2.5 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-[#064E3B] dark:text-[#FBBF24] hover:bg-[#FBBF24] hover:text-[#064E3B] text-xs font-bold flex items-center gap-1 border border-emerald-300 dark:border-emerald-800 transition-all"
                 title="Export Saved Job Platforms CSV"
               >
                 <Bookmark className="w-3.5 h-3.5" />
                 Saved Jobs CSV
               </button>
+
+              <button
+                onClick={() => {
+                  exportAllCareerDataCSV(applicationLogs, savedPlatformIds);
+                  setCsvDownloadToast('Exported complete career journey backup (Applications + Saved Platforms)!');
+                  setTimeout(() => setCsvDownloadToast(null), 4000);
+                }}
+                id="export-career-backup-csv-btn"
+                className="px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 text-xs font-bold flex items-center gap-1 border border-slate-300 dark:border-slate-700 transition-all"
+                title="Export Complete Career Journey CSV"
+              >
+                <FileText className="w-3.5 h-3.5 text-amber-500" />
+                Full Career Backup
+              </button>
             </div>
           </div>
+
+          {/* CSV Download Toast Banner */}
+          {csvDownloadToast && (
+            <div className="p-3 bg-emerald-900 text-amber-300 rounded-xl border border-amber-400/50 text-xs font-bold flex items-center justify-between gap-2 animate-in fade-in">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>{csvDownloadToast}</span>
+              </div>
+              <button onClick={() => setCsvDownloadToast(null)} className="text-white hover:text-amber-300 font-extrabold text-xs">×</button>
+            </div>
+          )}
 
           <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1 custom-scrollbar">
             {applicationLogs.map((log) => {

@@ -35,6 +35,7 @@ import {
 import { UserProfile } from '../types';
 import { exportFullBackupJSON } from '../utils/storage';
 import { exportSkillReportToPDF } from '../utils/pdfExport';
+import { getTranslation } from '../data/platformsData';
 
 interface UserProfileSectionProps {
   userProfile: UserProfile;
@@ -397,6 +398,86 @@ export const UserProfileSection: React.FC<UserProfileSectionProps> = ({
                 </span>
               </a>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* App UI Language & Multi-lingual Text Switcher Card */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2.5 rounded-xl bg-amber-400 text-emerald-950 font-black">
+              <Globe className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold text-emerald-950 dark:text-emerald-100 flex items-center gap-2">
+                {getTranslation(userProfile.uiLanguage, 'language')} Settings
+                <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-700 dark:text-amber-300 text-[10px] font-black uppercase tracking-wider">
+                  {userProfile.uiLanguage.toUpperCase()} Active
+                </span>
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Switch app UI text instantly to Spanish, French, Hindi, English, and regional languages.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+          {[
+            { code: 'es', name: 'Español (Spanish)', native: 'Spanish UI Text', flag: '🇪🇸' },
+            { code: 'fr', name: 'Français (French)', native: 'French UI Text', flag: '🇫🇷' },
+            { code: 'hi', name: 'हिंदी (Hindi)', native: 'Hindi UI Text', flag: '🇮🇳' },
+            { code: 'en', name: 'English (US)', native: 'Default English', flag: '🇺🇸' },
+            { code: 'sw', name: 'Kiswahili', native: 'Swahili UI', flag: '🇰🇪' },
+            { code: 'ha', name: 'Hausa', native: 'Hausa UI', flag: '🇳🇬' },
+            { code: 'ig', name: 'Igbo', native: 'Igbo UI', flag: '🇳🇬' },
+            { code: 'yo', name: 'Yorùbá', native: 'Yorùbá UI', flag: '🇳🇬' },
+          ].map((lang) => {
+            const isSelected = userProfile.uiLanguage === lang.code;
+            return (
+              <button
+                key={lang.code}
+                type="button"
+                id={`lang-toggle-${lang.code}-btn`}
+                onClick={() =>
+                  setUserProfile((prev) => ({
+                    ...prev,
+                    uiLanguage: lang.code as any,
+                  }))
+                }
+                className={`p-3 rounded-xl border text-xs font-extrabold flex flex-col items-start gap-1 transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-[#064E3B] text-amber-300 border-[#064E3B] shadow-md ring-2 ring-amber-400 scale-[1.02]'
+                    : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-amber-400'
+                }`}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-base">{lang.flag}</span>
+                  {isSelected ? (
+                    <Check className="w-4 h-4 text-amber-300" />
+                  ) : (
+                    <span className="text-[10px] text-slate-400 font-bold">Select</span>
+                  )}
+                </div>
+                <span className="font-bold text-xs">{lang.name}</span>
+                <span className="text-[10px] opacity-80 font-normal">{lang.native}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Dynamic Translation Mapping Feedback Banner */}
+        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium space-y-1">
+          <div className="text-[11px] font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            Mapped UI Keys via <code className="text-amber-600 dark:text-amber-300">getTranslation('{userProfile.uiLanguage}', key)</code>:
+          </div>
+          <div className="flex flex-wrap gap-2 text-[11px] text-slate-600 dark:text-slate-300 pt-1">
+            <span><strong>Header Title:</strong> "{getTranslation(userProfile.uiLanguage, 'appTitle')}"</span>
+            <span>• <strong>Search Placeholder:</strong> "{getTranslation(userProfile.uiLanguage, 'searchPlaceholder')}"</span>
+            <span>• <strong>Settings:</strong> "{getTranslation(userProfile.uiLanguage, 'settings')}"</span>
+            <span>• <strong>Offline Badge:</strong> "{getTranslation(userProfile.uiLanguage, 'offlineStatus')}"</span>
           </div>
         </div>
       </div>

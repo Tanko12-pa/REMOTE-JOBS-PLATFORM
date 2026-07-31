@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Globe, Moon, Sun, Bell, ShieldCheck, Menu, CheckCircle2, User, CreditCard, Clock } from 'lucide-react';
+import { Search, Globe, Moon, Sun, Bell, ShieldCheck, Menu, CheckCircle2, User, CreditCard, Clock, Wifi, WifiOff, Download } from 'lucide-react';
 import { UserProfile } from '../types';
 import { UI_TRANSLATIONS } from '../data/platformsData';
+import { VoiceSearchButton } from './VoiceSearchButton';
 
 interface HeaderProps {
   searchQuery: string;
@@ -96,9 +97,9 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Center: Global Real-time Search Input */}
+        {/* Center: Global Real-time Search Input with Voice-to-Text */}
         <div className="flex-1 max-w-md mx-2">
-          <div className="relative">
+          <div className="relative flex items-center">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-200" />
             <input
               type="text"
@@ -106,16 +107,22 @@ export const Header: React.FC<HeaderProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t.searchPlaceholder}
-              className="w-full pl-9 pr-4 py-1.5 text-sm bg-black/20 border border-white/20 rounded-xl text-white placeholder-emerald-200/60 focus:outline-none focus:ring-2 focus:ring-[#FBBF24] focus:border-transparent transition-all"
+              className="w-full pl-9 pr-16 py-1.5 text-sm bg-black/20 border border-white/20 rounded-xl text-white placeholder-emerald-200/60 focus:outline-none focus:ring-2 focus:ring-[#FBBF24] focus:border-transparent transition-all"
             />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-emerald-200 hover:text-white"
-              >
-                Clear
-              </button>
-            )}
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-[11px] text-emerald-200 hover:text-white px-1"
+                >
+                  Clear
+                </button>
+              )}
+              <VoiceSearchButton
+                onSearchQueryChange={setSearchQuery}
+                id="header-voice-search-mic-btn"
+              />
+            </div>
           </div>
         </div>
 
@@ -173,8 +180,9 @@ export const Header: React.FC<HeaderProps> = ({
               className="pl-7 pr-2 py-1.5 text-xs bg-black/20 border border-white/20 text-emerald-100 rounded-xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#FBBF24] font-medium"
             >
               <option value="en" className="bg-[#064E3B] text-white">English (US)</option>
-              <option value="fr" className="bg-[#064E3B] text-white">Français</option>
-              <option value="es" className="bg-[#064E3B] text-white">Español</option>
+              <option value="es" className="bg-[#064E3B] text-white">Español (Spanish)</option>
+              <option value="fr" className="bg-[#064E3B] text-white">Français (French)</option>
+              <option value="hi" className="bg-[#064E3B] text-white">हिंदी (Hindi)</option>
               <option value="ha" className="bg-[#064E3B] text-white">Hausa</option>
               <option value="ig" className="bg-[#064E3B] text-white">Igbo</option>
               <option value="yo" className="bg-[#064E3B] text-white">Yorùbá</option>

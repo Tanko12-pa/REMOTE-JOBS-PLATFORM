@@ -12,8 +12,11 @@ import {
   Tag,
   Copy,
   Check,
+  Wifi,
+  HardDrive,
 } from 'lucide-react';
 import { Platform, PlatformCategory } from '../types';
+import { VoiceSearchButton } from './VoiceSearchButton';
 
 interface PlatformListViewProps {
   platforms: Platform[];
@@ -130,6 +133,12 @@ export const PlatformListView: React.FC<PlatformListViewProps> = ({
 
           {/* Quick Filter Controls */}
           <div className="flex flex-wrap items-center gap-2">
+            {/* PWA Cache Offline Indicator */}
+            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-[#064E3B] dark:text-emerald-200 text-xs font-extrabold">
+              <HardDrive className="w-3.5 h-3.5 text-amber-500" />
+              <span>PWA Offline Cache Active</span>
+            </div>
+
             <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-slate-800 p-1 rounded-xl text-xs border border-gray-100 dark:border-slate-700">
               <Filter className="w-3.5 h-3.5 text-slate-400 ml-1" />
               {(['All', 'Free', 'Paid'] as const).map((cost) => (
