@@ -583,6 +583,14 @@ export const MAIN_PANEL_BUTTONS: MainPanelButton[] = [
     badge: 'Visual D3',
   },
   {
+    id: 'career_pathing',
+    label: '🎯 Career Pathing & Skill Gaps',
+    category: 'career_pathing',
+    description: 'AI market demand analysis, missing certifications & interactive visual timeline',
+    iconName: 'Sparkles',
+    badge: 'AI Roadmap',
+  },
+  {
     id: 'salary_trends',
     label: '📈 Salary Trend Visualizer',
     category: 'salary_trends',

@@ -35,6 +35,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { ApplicationLog, UserProfile } from '../types';
+import { JobSearchInsightsDashboard } from './JobSearchInsightsDashboard';
 import {
   exportApplicationsCSV,
   exportApplicationsJSON,
@@ -57,6 +58,7 @@ export const ApplicationTrackerView: React.FC<ApplicationTrackerViewProps> = ({
   setUserProfile,
   savedPlatformIds = [],
 }) => {
+  const [activeTab, setActiveTab] = useState<'tracker' | 'insights'>('tracker');
   const [company, setCompany] = useState<string>('');
   const [role, setRole] = useState<string>('');
   const [platformUsed, setPlatformUsed] = useState<string>('We Work Remotely');
@@ -481,7 +483,40 @@ export const ApplicationTrackerView: React.FC<ApplicationTrackerViewProps> = ({
         </div>
       </div>
 
-      {/* Target Keyword Toast Alert Message */}
+      {/* Sub-Tab Navigation Switcher */}
+      <div className="flex items-center gap-2 p-1.5 bg-slate-200 dark:bg-slate-800/80 rounded-xl w-fit border border-slate-300 dark:border-slate-700">
+        <button
+          onClick={() => setActiveTab('tracker')}
+          id="tracker-tab-btn"
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+            activeTab === 'tracker'
+              ? 'bg-[#064E3B] text-amber-300 shadow-sm'
+              : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <Target className="w-3.5 h-3.5" />
+          Application Tracker & Goal Ring
+        </button>
+
+        <button
+          onClick={() => setActiveTab('insights')}
+          id="insights-tab-btn"
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+            activeTab === 'insights'
+              ? 'bg-[#064E3B] text-amber-300 shadow-sm'
+              : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <BarChart2 className="w-3.5 h-3.5 text-amber-400" />
+          Job Search Insights Dashboard (Recharts Analytics)
+        </button>
+      </div>
+
+      {activeTab === 'insights' ? (
+        <JobSearchInsightsDashboard applicationLogs={applicationLogs} />
+      ) : (
+        <>
+          {/* Target Keyword Toast Alert Message */}
       {keywordToast && (
         <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-amber-950 text-white border-2 border-amber-400 shadow-xl flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex items-center gap-3">
@@ -977,6 +1012,8 @@ export const ApplicationTrackerView: React.FC<ApplicationTrackerViewProps> = ({
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };

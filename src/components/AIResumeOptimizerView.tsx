@@ -680,6 +680,18 @@ export const AIResumeOptimizerView: React.FC<AIResumeOptimizerViewProps> = ({
         </div>
       </div>
 
+      {/* Floating 'Download PDF' Action Button */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <button
+          onClick={() => exportResumeToPDF(formData, currentResume?.title || 'Resume')}
+          id="floating-download-pdf-btn"
+          className="px-5 py-3.5 rounded-full bg-[#064E3B] hover:bg-emerald-900 text-amber-300 font-extrabold text-xs flex items-center gap-2.5 shadow-2xl border-2 border-amber-400 hover:scale-105 transition-all cursor-pointer"
+        >
+          <Download className="w-4 h-4 text-amber-400" />
+          Download PDF Resume (jsPDF Export)
+        </button>
+      </div>
+
       {/* Print-Friendly CSS Stylesheet Modal */}
       {showPrintCSSModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4 overflow-y-auto">

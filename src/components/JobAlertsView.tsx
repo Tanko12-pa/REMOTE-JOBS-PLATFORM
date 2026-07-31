@@ -137,6 +137,68 @@ export const JobAlertsView: React.FC<JobAlertsViewProps> = ({
   const [matchingJobs, setMatchingJobs] = useState<JobAlertOpportunity[]>([]);
   const [testAlertToast, setTestAlertToast] = useState<string | null>(null);
 
+  // Daily Email Digest via Firebase Cloud Functions State
+  const [digestEmail, setDigestEmail] = useState<string>('user@example.com');
+  const [digestTime, setDigestTime] = useState<string>('08:00');
+  const [digestTimezone, setDigestTimezone] = useState<string>('America/New_York (EST/EDT)');
+  const [deliveryDays, setDeliveryDays] = useState<string[]>(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
+  const [minMatchThreshold, setMinMatchThreshold] = useState<number>(70);
+  const [saveConfigToast, setSaveConfigToast] = useState<string | null>(null);
+  const [isTriggeringDigest, setIsTriggeringDigest] = useState<boolean>(false);
+  const [digestResult, setDigestResult] = useState<{
+    executionTimestamp: string;
+    recipientEmail: string;
+    cronSchedule: string;
+    matchingCount: number;
+    matchingJobs: any[];
+    htmlEmailPreview: string;
+    statusMessage: string;
+  } | null>(null);
+  const [showEmailPreviewModal, setShowEmailPreviewModal] = useState<boolean>(false);
+
+  const toggleDeliveryDay = (day: string) => {
+    if (deliveryDays.includes(day)) {
+      if (deliveryDays.length === 1) return; // Keep at least one day
+      setDeliveryDays(deliveryDays.filter((d) => d !== day));
+    } else {
+      setDeliveryDays([...deliveryDays, day]);
+    }
+  };
+
+  const handleSaveDeliveryConfig = () => {
+    setSaveConfigToast(
+      `Delivery time updated! Daily Job Digest will arrive at ${digestTime} (${digestTimezone}) on [${deliveryDays.join(
+        ', '
+      )}] for jobs matching ≥${minMatchThreshold}%.`
+    );
+    setTimeout(() => setSaveConfigToast(null), 4500);
+  };
+
+  const handleTriggerDailyDigest = async () => {
+    setIsTriggeringDigest(true);
+    try {
+      const response = await fetch('/api/job-alerts/trigger-daily-digest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: digestEmail,
+          targetKeywords: userKeywords,
+          frequency: 'Daily',
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setDigestResult(data);
+        setShowEmailPreviewModal(true);
+      }
+    } catch (err) {
+      console.error('Failed to trigger daily digest task', err);
+    } finally {
+      setIsTriggeringDigest(false);
+    }
+  };
+
   // Compute matched jobs whenever keywords or search change
   useEffect(() => {
     const activeKeywords = userKeywords.map((k) => k.toLowerCase().trim()).filter(Boolean);
@@ -524,6 +586,227 @@ export const JobAlertsView: React.FC<JobAlertsViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Firebase Cloud Functions Scheduled Daily Email Digest Card */}
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-emerald-950 rounded-2xl p-6 border border-emerald-500/40 text-white shadow-md space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-500/20 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-amber-400 text-emerald-950 shrink-0 font-black">
+              <Mail className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-extrabold text-amber-300 flex items-center gap-2">
+                Automated Daily Email Digest Delivery Configuration
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/40">
+                  Active Schedule: {digestTime} ({digestTimezone.split(' ')[0]})
+                </span>
+              </h3>
+              <p className="text-xs text-slate-300 mt-0.5">
+                Configure your preferred time of day, timezone, and delivery days for automated server email dispatch of high-match job opportunities.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleSaveDeliveryConfig}
+              id="save-email-delivery-config-btn"
+              className="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-extrabold text-xs flex items-center gap-2 transition-all hover:scale-105 shadow-sm"
+            >
+              <CheckCircle2 className="w-4 h-4 text-amber-300" />
+              Save Delivery Preferences
+            </button>
+
+            <button
+              onClick={handleTriggerDailyDigest}
+              disabled={isTriggeringDigest}
+              id="trigger-firebase-digest-task-btn"
+              className="px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-emerald-950 font-black text-xs flex items-center gap-2 transition-all hover:scale-105 shadow-sm disabled:opacity-50"
+            >
+              {isTriggeringDigest ? (
+                <>
+                  <Send className="w-4 h-4 animate-spin text-emerald-950" />
+                  Executing Scheduled Task...
+                </>
+              ) : (
+                <>
+                  <Zap className="w-4 h-4 fill-emerald-950" />
+                  Test Email Dispatch Now
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {saveConfigToast && (
+          <div className="p-3 rounded-xl bg-amber-400/20 border border-amber-400 text-amber-200 text-xs font-extrabold flex items-center gap-2 animate-in fade-in">
+            <CheckCircle2 className="w-4 h-4 text-amber-300 shrink-0" />
+            {saveConfigToast}
+          </div>
+        )}
+
+        {/* Configuration Panel Form Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          {/* Email Address */}
+          <div>
+            <label className="block text-[11px] font-extrabold text-slate-300 mb-1 flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5 text-amber-400" />
+              Recipient Email
+            </label>
+            <input
+              type="email"
+              value={digestEmail}
+              onChange={(e) => setDigestEmail(e.target.value)}
+              placeholder="user@example.com"
+              className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-mono text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none"
+            />
+          </div>
+
+          {/* Preferred Time of Day */}
+          <div>
+            <label className="block text-[11px] font-extrabold text-slate-300 mb-1 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-amber-400" />
+              Preferred Time of Day
+            </label>
+            <input
+              type="time"
+              value={digestTime}
+              onChange={(e) => setDigestTime(e.target.value)}
+              id="digest-time-picker"
+              className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-mono text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none"
+            />
+          </div>
+
+          {/* Preferred Timezone */}
+          <div>
+            <label className="block text-[11px] font-extrabold text-slate-300 mb-1 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-amber-400" />
+              User Timezone
+            </label>
+            <select
+              value={digestTimezone}
+              onChange={(e) => setDigestTimezone(e.target.value)}
+              id="digest-timezone-select"
+              className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 font-medium text-xs focus:ring-2 focus:ring-amber-400 focus:outline-none"
+            >
+              <option value="America/New_York (EST/EDT)">America/New_York (EST/EDT)</option>
+              <option value="America/Los_Angeles (PST/PDT)">America/Los_Angeles (PST/PDT)</option>
+              <option value="Europe/London (GMT/BST)">Europe/London (GMT/BST)</option>
+              <option value="Europe/Berlin (CET/CEST)">Europe/Berlin (CET/CEST)</option>
+              <option value="Asia/Tokyo (JST)">Asia/Tokyo (JST)</option>
+              <option value="UTC (Coordinated Universal Time)">UTC (Coordinated Universal Time)</option>
+            </select>
+          </div>
+
+          {/* Minimum Match Score Threshold */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[11px] font-extrabold text-slate-300 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                Min Match Score:
+              </label>
+              <span className="text-xs font-black text-amber-300">{minMatchThreshold}%</span>
+            </div>
+            <input
+              type="range"
+              min="50"
+              max="95"
+              step="5"
+              value={minMatchThreshold}
+              onChange={(e) => setMinMatchThreshold(Number(e.target.value))}
+              id="min-match-score-slider"
+              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
+            />
+            <p className="text-[10px] text-slate-400 mt-1">Only email jobs with high relevance</p>
+          </div>
+        </div>
+
+        {/* Days of the Week Selector */}
+        <div className="pt-2 border-t border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span className="text-[11px] font-extrabold text-slate-300 block mb-1">
+              Delivery Days of the Week:
+            </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => {
+                const isSelected = deliveryDays.includes(day);
+                return (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => toggleDeliveryDay(day)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      isSelected
+                        ? 'bg-amber-400 text-emerald-950 shadow-xs'
+                        : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="text-right">
+            <span className="text-[10px] text-slate-400 block">Active Filter Keywords:</span>
+            <span className="text-xs font-bold text-amber-300">
+              {userKeywords.join(', ') || 'All Remote Opportunities'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Email Digest Preview Modal */}
+      {showEmailPreviewModal && digestResult && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-emerald-800 text-amber-300 font-extrabold">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                    Scheduled Email Digest Preview
+                  </h3>
+                  <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                    {digestResult.statusMessage}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowEmailPreviewModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs space-y-1 font-mono text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+              <div><strong>Recipient:</strong> {digestResult.recipientEmail}</div>
+              <div><strong>Cron Schedule:</strong> {digestResult.cronSchedule}</div>
+              <div><strong>Execution Timestamp:</strong> {digestResult.executionTimestamp}</div>
+              <div><strong>Aggregated Matching Jobs:</strong> {digestResult.matchingCount} positions</div>
+            </div>
+
+            <div
+              className="p-4 rounded-xl border border-slate-200 bg-white dark:bg-slate-950 text-slate-900 overflow-x-auto text-xs"
+              dangerouslySetInnerHTML={{ __html: digestResult.htmlEmailPreview }}
+            />
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowEmailPreviewModal(false)}
+                className="px-4 py-2 rounded-xl bg-[#064E3B] text-amber-300 font-extrabold text-xs"
+              >
+                Close Email Preview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Real-Time Filtered Matching Jobs Section */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">

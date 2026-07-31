@@ -53,6 +53,7 @@ import { AICareerMentorView } from './components/AICareerMentorView';
 import { UserProfileSection } from './components/UserProfileSection';
 import { SubscriptionBillingView } from './components/SubscriptionBillingView';
 import { JobAlertsView } from './components/JobAlertsView';
+import { CareerPathingView } from './components/CareerPathingView';
 import { PushNotificationModal } from './components/PushNotificationModal';
 import { OAuthModal } from './components/OAuthModal';
 
@@ -417,6 +418,13 @@ export function App() {
 
           {(activeCategory === 'd3_roadmap' || activeCategory === 'categories_roadmap') && (
             <JobCategoriesD3RoadmapView />
+          )}
+
+          {activeCategory === 'career_pathing' && (
+            <CareerPathingView
+              userProfile={userProfile}
+              setUserProfile={setUserProfile}
+            />
           )}
 
           {(activeCategory === 'salary_visualizer' || activeCategory === 'salary_trends') && (
